@@ -1,4 +1,4 @@
-import requests
+import aiohttp
 import json
 
 # Bitcoin node client
@@ -18,17 +18,17 @@ class Bitcoin(object):
             "id": self.rid
         }
 
-    def make_request(self, method, params=[]):
-        headers = {"content-type": "text/plain;"}
-        data = json.dumps({
-            "method": method, "params": params,
-            "id": self.rid
-        })
+    async def make_request(self, method, params=[]):
+        async with aiohttp.ClientSession() as session:
+            headers = {"content-type": "text/plain;"}
+            data = json.dumps({
+                "method": method, "params": params,
+                "id": self.rid
+            })
 
-        try:
-            return requests.post(
-                self.endpoint, headers=headers, data=data
-            ).json()
-
-        except Exception:
-            return self.dead_response()
+            try:
+                async with session.post(self.endpoint, headers=headers, data=data) as response:
+                    resp = await response.json()
+                    return resp
+            except Exception:
+                return self.dead_response()

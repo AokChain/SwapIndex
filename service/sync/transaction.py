@@ -15,17 +15,18 @@ async def sync_transactions():
         results = await session.exec(statement)
 
         for transaction in results:
-            data = client.make_request("sendrawtransaction", [transaction.raw_tx])
+            data = await client.make_request("sendrawtransaction", [transaction.raw_tx])
 
             if data["result"]:
                 continue
 
-            data = client.make_request("decoderawtransaction", [transaction.raw_tx])['result']
+            data = await client.make_request("decoderawtransaction", [transaction.raw_tx])
+            data = data['result']
 
             input_txid = data["vin"][0]["txid"]
             input_vout = data["vin"][0]["vout"]
 
-            data = client.make_request("gettxout", [input_txid, input_vout])
+            data = await client.make_request("gettxout", [input_txid, input_vout])
 
             if data["result"]:
                 transaction.closed = False
