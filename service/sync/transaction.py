@@ -21,7 +21,7 @@ async def sync_transactions():
                 continue
 
             data = await client.make_request("decoderawtransaction", [transaction.raw_tx])
-            data = data['result']
+            data = data["result"]
 
             input_txid = data["vin"][0]["txid"]
             input_vout = data["vin"][0]["vout"]
