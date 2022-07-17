@@ -1,9 +1,18 @@
-from apscheduler.schedulers.blocking import BlockingScheduler
-from app.sync import sync_transactions
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import asyncio
+
+def init_scheduler():
+    scheduler = AsyncIOScheduler()
+
+    from service.sync import sync_transactions
+
+    scheduler.add_job(sync_transactions, 'interval', seconds=10)
+    scheduler.start()
+
+    try:
+        asyncio.get_event_loop().run_forever()
+    except (KeyboardInterrupt, SystemExit):
+        pass
 
 if __name__ == "__main__":
-    scheduler = BlockingScheduler()
-
-    scheduler.add_job(sync_transactions, "interval", seconds=10)
-
-    scheduler.start()
+    init_scheduler()

@@ -1,9 +1,9 @@
-from sqlmodel import SQLModel, Field
 from pydantic import condecimal
+from sqlmodel import Field
 from typing import Optional
+from .base import BaseTable
 
-class Transaction(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class Transaction(BaseTable, table=True):
     raw_tx: str
     send_token: Optional[str] = Field(default=None)
     send_amount: Optional[condecimal(max_digits=20, decimal_places=8)] = Field(default=0)
