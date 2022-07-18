@@ -9,6 +9,6 @@ class Output(BaseTable, table=True):
     currency: str
     spent: Optional[bool] = Field(default=False)
 
-    transaction_id: int = Field(default=None, foreign_key="transaction.id")
+    transaction_id: Optional[int] = Field(default=None, foreign_key="transaction.id")
     transaction: Optional["Transaction"] = Relationship(back_populates="outputs")
 
