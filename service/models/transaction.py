@@ -1,6 +1,6 @@
+from sqlmodel import Field, Relationship
+from typing import Optional, List
 from pydantic import condecimal
-from sqlmodel import Field
-from typing import Optional
 from .base import BaseTable
 
 class Transaction(BaseTable, table=True):
@@ -10,3 +10,4 @@ class Transaction(BaseTable, table=True):
     receive_token: Optional[str] = Field(default=None)
     receive_amount: Optional[condecimal(max_digits=20, decimal_places=8)] = Field(default=0)
     closed: bool = Field(default=True)
+    outputs: List["Output"] = Relationship(back_populates="transaction")
