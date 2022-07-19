@@ -1,7 +1,7 @@
 from sqlmodel.ext.asyncio.session import AsyncSession
 from pydantic import BaseModel, validator
+from ..models import Transaction, Output
 from fastapi import APIRouter, Depends
-from ..models import Transaction
 from ..clients import Bitcoin
 from sqlmodel import select
 from .. import utils
@@ -29,19 +29,45 @@ async def add(txbody: TxPostBody, session: AsyncSession = Depends(db.get_async_s
             raw_tx=txbody.raw_tx,
         )
 
-        data = client.make_request("decoderawtransaction", [transaction.raw_tx])["result"]
+        session.add(transaction)
+        await session.commit()
+        await session.refresh(transaction)
+
+        data = await client.make_request("decoderawtransaction", [transaction.raw_tx])
+        data = data["result"]
 
         if "token" in data["vout"][0]["scriptPubKey"].keys():
             transaction.receive_token = data["vout"][0]["scriptPubKey"]["token"]["name"]
             transaction.receive_amount = data["vout"][0]["scriptPubKey"]["token"]["amount"]
+            output = Output(
+                reference=utils.get_uuid(),
+                txid=data["txid"],
+                amount=data["vout"][0]["scriptPubKey"]["token"]["amount"],
+                currency=data["vout"][0]["scriptPubKey"]["token"]["name"],
+                transaction_id = transaction.id,
+                transaction=transaction
+            )
+
+            session.add(output)
+
         else:
             transaction.receive_token = "AOK"
             transaction.receive_amount = data["vout"][0]["value"]
+            output = Output(
+                reference=utils.get_uuid(),
+                txid=data["txid"],
+                amount=data["vout"][0]["value"],
+                currency="AOK",
+                transaction_id = transaction.id,
+                transaction=transaction
+            )
+            session.add(output)
 
         input_txid = data["vin"][0]["txid"]
         input_vout = data["vin"][0]["vout"]
 
-        data = client.make_request("getrawtransaction", [input_txid, True])["result"]
+        data = await client.make_request("getrawtransaction", [input_txid, True])
+        data = data["result"]
 
         for vout in data["vout"]:
             if vout["n"] == input_vout:
