@@ -8,7 +8,7 @@ async def init_settings():
         statement = select(Settings)
         results = await session.exec(statement)
 
-        if not results.first():
+        if not results.one_or_none():
             settings = Settings()
             session.add(settings)
 
