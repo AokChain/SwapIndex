@@ -76,7 +76,6 @@ async def add(txbody: TxPostBody, session: AsyncSession = Depends(db.get_async_s
             )
 
             session.add(output)
-            break
         else:
             transaction.send_token = "AOK"
             transaction.send_amount = vout["value"]
@@ -91,7 +90,6 @@ async def add(txbody: TxPostBody, session: AsyncSession = Depends(db.get_async_s
             )
 
             session.add(output)
-            break
 
     result["data"] = {
         "raw_tx": transaction.raw_tx,
