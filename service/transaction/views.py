@@ -60,38 +60,38 @@ async def add(txbody: TxPostBody, session: AsyncSession = Depends(db.get_async_s
             return result
 
         data = data["result"]
+        vout = data["vout"][input_vout]
 
-        for vout in data["vout"][input_vout]:
-            if "token" in vout["scriptPubKey"].keys():
-                transaction.send_token = vout["scriptPubKey"]["token"]["name"]
-                transaction.send_amount = vout["scriptPubKey"]["token"]["amount"]
+        if "token" in vout["scriptPubKey"].keys():
+            transaction.send_token = vout["scriptPubKey"]["token"]["name"]
+            transaction.send_amount = vout["scriptPubKey"]["token"]["amount"]
 
-                output = Output(
-                    reference=utils.get_uuid(),
-                    txid=input_txid,
-                    amount=vout["scriptPubKey"]["token"]["amount"],
-                    currency=vout["scriptPubKey"]["token"]["name"],
-                    transaction_id=transaction.id,
-                    transaction=transaction
-                )
+            output = Output(
+                reference=utils.get_uuid(),
+                txid=input_txid,
+                amount=vout["scriptPubKey"]["token"]["amount"],
+                currency=vout["scriptPubKey"]["token"]["name"],
+                transaction_id=transaction.id,
+                transaction=transaction
+            )
 
-                session.add(output)
-                break
-            else:
-                transaction.send_token = "AOK"
-                transaction.send_amount = vout["value"]
+            session.add(output)
+            break
+        else:
+            transaction.send_token = "AOK"
+            transaction.send_amount = vout["value"]
 
-                output = Output(
-                    reference=utils.get_uuid(),
-                    txid=input_txid,
-                    amount=vout["value"],
-                    currency="AOK",
-                    transaction_id=transaction.id,
-                    transaction=transaction
-                )
+            output = Output(
+                reference=utils.get_uuid(),
+                txid=input_txid,
+                amount=vout["value"],
+                currency="AOK",
+                transaction_id=transaction.id,
+                transaction=transaction
+            )
 
-                session.add(output)
-                break
+            session.add(output)
+            break
 
     result["data"] = {
         "raw_tx": transaction.raw_tx,
