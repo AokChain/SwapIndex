@@ -13,8 +13,10 @@ class Transaction(BaseTable, table=True):
     ] = Field(default=0)
 
     outputs: List["Output"] = Relationship(back_populates="transaction")
+    indexes: List["Index"] = Relationship(back_populates="transaction")
     receive_token: Optional[str] = Field(default=None)
     send_token: Optional[str] = Field(default=None)
     txid: Optional[str] = Field(default=None)
+    indexed: bool = Field(default=False)
     closed: bool = Field(default=True)
     raw_tx: str
