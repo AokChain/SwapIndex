@@ -2,7 +2,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from ..models import Transaction
 from ..clients import Bitcoin
 from sqlmodel import select
-from . import utils
+from .. import utils
 from .. import db
 import config
 
